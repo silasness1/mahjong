@@ -1,2 +1,1 @@
-# mahjong
-Python mahjong game
+
