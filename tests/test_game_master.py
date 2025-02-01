@@ -1,28 +1,29 @@
 """Tests related to the game_master module"""
-import unittest
-from unittest import TestCase
+
+import pytest
 from unittest.mock import patch
-from game_master import GameMaster
- 
-class idk(TestCase):
+from mahjong.game_master import GameMaster
 
-    @patch('builtins.input', side_effect = ['Mom', 'Dad', 'Sister', 'Brother'])
-    def test_GameMaster_init(self, mock_input):
-        
-        with_names = GameMaster(customNames=True)
 
-        assert with_names.playerList[0].name == 'Mom'
-        assert with_names.playerList[3].name == 'Brother'
+# Test function (no need for classes with pytest)
+@patch("builtins.input", side_effect=["Mom", "Dad", "Sister", "Brother"])
+def test_GameMaster_init(mock_input):
+    # Create the GameMaster instance with custom names
+    with_names = GameMaster(customNames=True)
+
+    # Assert that the player names are correct
+    assert with_names.playerList[0].name == "Mom"
+    assert with_names.playerList[3].name == "Brother"
 
 
 # class ExampleTests(TestCase):
 
-    
-#     # def setUp(self):  
+
+#     # def setUp(self):
 #         # self.game = GameMaster()
-        
+
 #     @patch('mahjong.example.input', create=True)
-#     def test_example(self, mock_input):  
+#     def test_example(self, mock_input):
 #         mock_input.side_effect = ['Mom', 'Dad', 'Sister', 'Brother']
 #         res = function2()
 #         print(res)
@@ -32,7 +33,7 @@ class idk(TestCase):
 #         unittest.main(verbosity=True)
 
 #     def test_lockTiles(self):
-#         #TODO: Fix/figure out how/what happened. 
+#         #TODO: Fix/figure out how/what happened.
 #         """
 #     PlayerE's Hand:
 # Hand

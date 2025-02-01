@@ -1,15 +1,14 @@
 """A collection of functions to check validity of potential moves and whether a collection 
 of tiles is a valid mahjong."""
 
-from tile import Tile
-from deck import Deck
+from mahjong.tile import Tile
+from mahjong.deck import Deck
 from functools import lru_cache
 from typing import List
 
 
 def getCount(hand: List[Tile], match) -> int:
-    """Helper function to return the number of tiles in `hand` that match the `match`.
-    """
+    """Helper function to return the number of tiles in `hand` that match the `match`."""
     matchCount = 0  # number of identical tiles in hand as discard
     for tile in hand:
         if match == tile:
@@ -17,7 +16,7 @@ def getCount(hand: List[Tile], match) -> int:
     return matchCount
 
 
-def fillNone(suit:str, rank:int, adj:int)-> Tile | None:
+def fillNone(suit: str, rank: int, adj: int) -> Tile | None:
     """Helper function to see whether tiles with `rank` + `adjustment`
     are legitimate
     """
@@ -27,16 +26,16 @@ def fillNone(suit:str, rank:int, adj:int)-> Tile | None:
         return None
 
 
-def getChouIndices(index:int, hand:list[Tile])->list[int]:
+def getChouIndices(index: int, hand: list[Tile]) -> list[int]:
     """
-    Checks for a chou (run of the same suit) in a collection of tiles 
+    Checks for a chou (run of the same suit) in a collection of tiles
 
-    Params: 
+    Params:
     -------------
     `hand`: the collection of tiles in which you're looking for a chou
     `index`:the index of a tile that exists in `hand`
 
-    Returns: 
+    Returns:
     ---------------
     A list of index values that form a chou in the `hand`
     """
@@ -70,16 +69,18 @@ def getChouIndices(index:int, hand:list[Tile])->list[int]:
     return meldIndices
 
 
-def getOfAKindIndices(index:int, hand:list[Tile], OfAKind=Deck.NUMCOPIES)->list[int]:
-    """Given a hand and a the index of a single tile in the hand, 
+def getOfAKindIndices(
+    index: int, hand: list[Tile], OfAKind=Deck.NUMCOPIES
+) -> list[int]:
+    """Given a hand and a the index of a single tile in the hand,
     returns a list of indices of the first OfAKind=n found matching tiles in the hand
-    
+
     Params
     ----------
     - index: the index value for a tile in the hand that you want to find a n-of-a kind for
-    - hand: the collection of tiles you're looking in 
+    - hand: the collection of tiles you're looking in
     - OfAKind: the number of matching tiles you're looking for
-    
+
     Returns
     -----------
     a list of the first n tiles it finds that match hand[index]"""
@@ -93,11 +94,15 @@ def getOfAKindIndices(index:int, hand:list[Tile], OfAKind=Deck.NUMCOPIES)->list[
 
 
 # @lru_cache()
-def checkMahjongMelds(hand:list[Tile], recursionCounter=0, meldCount=0, pairCount=0)-> tuple[bool,int,int]: #TODO: Refactor to take a player as a parameter so you can use the Tile collection methods
+def checkMahjongMelds(
+    hand: list[Tile], recursionCounter=0, meldCount=0, pairCount=0
+) -> tuple[
+    bool, int, int
+]:  # TODO: Refactor to take a player as a parameter so you can use the Tile collection methods
     """
-    Assumes 17 tiles total. 
+    Assumes 17 tiles total.
 
-    Algorithm overview: 
+    Algorithm overview:
     1) Take a tile
     2) Get all possible chou role positions associated with tile.
     3) Pop the first chou, if the sub problem doesn't work move to the next
@@ -110,7 +115,7 @@ def checkMahjongMelds(hand:list[Tile], recursionCounter=0, meldCount=0, pairCoun
     Params
     ----------
     - hand (should refactor to player)
-    - recursionCounter 
+    - recursionCounter
     - meldCount
     - pairCount
 
@@ -124,7 +129,7 @@ def checkMahjongMelds(hand:list[Tile], recursionCounter=0, meldCount=0, pairCoun
     2.1) save all the eligible roles & their indices to reduce problem
 
     Okay
-   
+
     Returns
     --------
     A tuple that contains....
@@ -193,17 +198,19 @@ def checkMahjongMelds(hand:list[Tile], recursionCounter=0, meldCount=0, pairCoun
             return False, meldCount, pairCount
 
 
-def checkMahjongPairs(hand:list[Tile], _recursionCounter=0, meldCount=0, pairCount=0)->tuple[bool,int,int]:
+def checkMahjongPairs(
+    hand: list[Tile], _recursionCounter=0, meldCount=0, pairCount=0
+) -> tuple[bool, int, int]:
     """Looks for the type of mahjong with 7 pairs and 1 meld
-    
+
     Params:
     --------
-    - `hand`: a colection of tiles to look for mahjong in 
+    - `hand`: a colection of tiles to look for mahjong in
     - `_recursionCounter`: not to be used, but keeps track of how many times the method calls itself
     - `meldCount`: the number of chous kongs or pongs found so far in the recursion
     - `pairCount`: the number of pairs found so far in the recursion
 
-    Returns: 
+    Returns:
     ----------
     A tuple with a bool about being mahjong, meldCount, and the pairCount
     """
@@ -268,7 +275,7 @@ def checkMahjongPairs(hand:list[Tile], _recursionCounter=0, meldCount=0, pairCou
             return False, meldCount, pairCount  # singletons with no working chous
 
 
-def checkMahjong(hand:list[Tile])->bool:
+def checkMahjong(hand: list[Tile]) -> bool:
     """Returns true or false that the `hand` contains either kind of mahjong"""
     meld = checkMahjongMelds(hand)
     pair = checkMahjongPairs(hand)

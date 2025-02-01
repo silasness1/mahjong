@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.autoComplete.extraPaths": [
+			"${workspaceFolder}/tests",
+			"${workspaceFolder}/mahjong"
+		],
+
+		"python.testing.pytestArgs": [
+			"${workspaceFolder}/tests"
+		]
+	}
+}
