@@ -1,8 +1,13 @@
 """Tests related to the game_master module"""
 
+<<<<<<< HEAD
 import pytest
 from unittest.mock import patch
 from mahjong.game_master import GameMaster
+=======
+from unittest.mock import patch
+from game_master import GameMaster
+>>>>>>> 18507d4 (pytest working)
 
 
 # Test function (no need for classes with pytest)

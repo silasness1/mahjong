@@ -1,17 +1,18 @@
 {
 	"folders": [
 		{
-			"path": "."
-		}
+            "path": "."
+        }
 	],
 	"settings": {
-		"python.autoComplete.extraPaths": [
-			"${workspaceFolder}/tests",
-			"${workspaceFolder}/mahjong"
-		],
+
 
 		"python.testing.pytestArgs": [
-			"${workspaceFolder}/tests"
-		]
+			"tests"
+		],
+		"python.testing.unittestEnabled": false,
+		"python.testing.pytestEnabled": true,
+		"python.envFile": "${workspaceFolder}/.env" /*cant use analysis.extrapath because it doesn't support pytest runner*/
+		
 	}
 }

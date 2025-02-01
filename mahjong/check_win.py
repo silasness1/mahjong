@@ -93,7 +93,11 @@ def getOfAKindIndices(
     return matchIndices
 
 
+<<<<<<< HEAD
 # @lru_cache()
+=======
+@lru_cache()
+>>>>>>> 18507d4 (pytest working)
 def checkMahjongMelds(
     hand: list[Tile], recursionCounter=0, meldCount=0, pairCount=0
 ) -> tuple[

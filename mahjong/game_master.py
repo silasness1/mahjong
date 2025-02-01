@@ -1,8 +1,14 @@
 """GameMaster manages the main game loop."""
 
+<<<<<<< HEAD
 from mahjong.deck import Deck
 from mahjong.player import Player
 import mahjong.check_win as check_win
+=======
+from deck import Deck
+from player import Player
+import check_win as check_win
+>>>>>>> 18507d4 (pytest working)
 import random
 
 
