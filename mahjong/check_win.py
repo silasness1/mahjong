@@ -1,8 +1,8 @@
 """A collection of functions to check validity of potential moves and whether a collection 
 of tiles is a valid mahjong."""
 
-from mahjong.tile import Tile
-from mahjong.deck import Deck
+from tile import Tile
+from deck import Deck
 from functools import lru_cache
 from typing import List
 
@@ -93,11 +93,7 @@ def getOfAKindIndices(
     return matchIndices
 
 
-<<<<<<< HEAD
-# @lru_cache()
-=======
 @lru_cache()
->>>>>>> 18507d4 (pytest working)
 def checkMahjongMelds(
     hand: list[Tile], recursionCounter=0, meldCount=0, pairCount=0
 ) -> tuple[

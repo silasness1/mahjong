@@ -1,9 +1,5 @@
 import random
-<<<<<<< HEAD
-from mahjong.tile import Tile
-=======
 from tile import Tile
->>>>>>> 18507d4 (pytest working)
 
 
 class Deck:  # todo: finish docstring
@@ -40,11 +36,6 @@ class Deck:  # todo: finish docstring
         if test:
             random.seed(10)
         nSample = random.sample(self.stock, n)
-<<<<<<< HEAD
-        for Tile in nSample:
-            tileIndex = self.stock.index(Tile)
-=======
         for this_tile in nSample:
             tileIndex = self.stock.index(this_tile)
->>>>>>> 18507d4 (pytest working)
             target.append(self.stock.pop(tileIndex))

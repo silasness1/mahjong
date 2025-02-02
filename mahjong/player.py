@@ -1,4 +1,4 @@
-from mahjong.tile import Tile
+from tile import Tile
 
 
 class Player:  # maybe deck and players inherit from tile collections
