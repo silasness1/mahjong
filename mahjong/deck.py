@@ -1,3 +1,4 @@
+from multiprocessing import Value
 import random
 from tile import Tile
 
@@ -31,11 +32,19 @@ class Deck:  # todo: finish docstring
             random.seed(test_seed)
         random.shuffle(self.stock)
 
-    def moveNRandom(self, n: int, target: list[Tile], test=False) -> None:
-        """moves `n` tiles from the deck to the target"""
+    def moveNRandom(self, n: int, target: list[Tile], test=False) -> bool:
+        """moves `n` tiles from the deck to the target
+        Returns success or fail.
+        """
         if test:
             random.seed(10)
-        nSample = random.sample(self.stock, n)
+
+        try:
+            nSample = random.sample(self.stock, n)
+        except ValueError:
+            print("Stock ran out of tiles. No one wins.")
+            return False
         for this_tile in nSample:
             tileIndex = self.stock.index(this_tile)
             target.append(self.stock.pop(tileIndex))
+        return True

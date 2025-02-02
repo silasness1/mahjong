@@ -1,6 +1,12 @@
 """TODO: use inheritance to define two subclasses human and AI players"""
 
 from tile import Tile
+from abc import abstractmethod
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from game_master import GameMaster  # Only for type hints, prevents circular import
 
 
 class Player:  # maybe deck and players inherit from tile collections
@@ -18,12 +24,18 @@ class Player:  # maybe deck and players inherit from tile collections
     - `name`: the player's name
     """
 
-    def __init__(self, name) -> None:
-        self.hand = []
-        self.lockedTiles = (
-            []
-        )  # for drawing from graveyard or kongs, prevents reorganizing in checking for mahjong
-        self.name = name
+    def __init__(self, name: str, game_master: "GameMaster") -> None:
+
+        self.hand: list[Tile] = []
+
+        # for drawing from graveyard or kongs, prevents reorganizing in checking for mahjong
+        self.lockedTiles = []
+
+        # player name
+        self.name: str = name
+
+        # Careful not to use self.game_master before GameMaster finishes init
+        self.game_master = game_master
 
     def __str__(self):
         printString = f"{self.name}: "
@@ -84,20 +96,25 @@ class Player:  # maybe deck and players inherit from tile collections
                 + handDisplay
             )
 
+    @abstractmethod
     def get_discard_input(self):
-        """For human players enter a number to indicate which part of your hand to get rid of."""
-        while True:
-            print(self.displayHand())
-            try:
-                discardChoice = int(
-                    input(f"Enter 1 to {len(self.hand)} of which card to discard: ")
-                )
-            except ValueError:
-                print("Not an integer.")
-                continue
-            if not ((discardChoice >= 1) and (discardChoice <= len(self.hand))):
-                print("Not in proper range. ")
-                continue
-            else:
-                break
-        return discardChoice
+        """Note the only parameter is self because Players can get access to game state through `self.game_master`
+        Human and AI players have to implement this method."""
+        pass
+
+    @abstractmethod
+    def get_draw_preference(self, last_tile: Tile) -> int:
+        """Note the only parameter is self because Players can get access to game state through `self.game_master`
+        Human and AI players have to implement this method."""
+        pass
+
+    @abstractmethod
+    def draw_pref_feedback(self, success: bool, preference: int):
+        """Things to do when GameMaster indicates preference was illegal.
+
+        Param
+        -------
+        - success: last submitted preference was legal
+        - preference: the last submitted preference
+        """
+        pass

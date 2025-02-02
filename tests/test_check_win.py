@@ -1,5 +1,5 @@
 import check_win
-from hand_data import *
+from hand_data import *  # noqa: F403
 
 
 def test_getChouIndices(hand_meldwise_mahjong_unordered):

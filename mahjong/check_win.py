@@ -3,11 +3,12 @@ of tiles is a valid mahjong."""
 
 from tile import Tile
 from deck import Deck
-from functools import lru_cache
+
+# from functools import lru_cache
 from typing import List
 
 
-def getCount(hand: List[Tile], match) -> int:
+def getCount(hand: List[Tile], match: Tile) -> int:
     """Helper function to return the number of tiles in `hand` that match the `match`."""
     matchCount = 0  # number of identical tiles in hand as discard
     for tile in hand:
@@ -26,26 +27,9 @@ def fillNone(suit: str, rank: int, adj: int) -> Tile | None:
         return None
 
 
-def getChouIndices(index: int, hand: list[Tile]) -> list[list[int]]:
-    """
-    Checks for a the 3 possible chous (run of the same suit) in a collection of tiles
-    given the index.
-
-    Params:
-    -------------
-    `hand`: the collection of tiles in which you're looking for a chou
-    `index`:the index of a tile that exists in `hand`
-
-    Returns:
-    ---------------
-    A list of listed index values that form a chou in the `hand`
-    First entry: 3 index values that form a "XOO" chou
-    Second entry: 3 index values that form a "OOX" chou
-    Third entry: 3 index values that form a "OXO" chou
-    """
-    if index < 0:  # to support negative index
-        index = len(hand) + index  # example -1: 16 - 1 = 15
-    meldIndices = [None] * 3  # -1 are placeholders -_-
+def getChouComponents(index: int, hand: list[Tile]):
+    """Returns first matches of hand index for
+    tiles in the hand with ranks within +/-2 when compared to hand[index] tile"""
     discardRank = hand[index].rank
     discardSuit = hand[index].suit
 
@@ -74,6 +58,32 @@ def getChouIndices(index: int, hand: list[Tile]) -> list[list[int]]:
             if relevantTiles[cnt2] == hand[cnt]:
                 greedyIndex[cnt2] = cnt
 
+    return greedyIndex
+
+
+def getChouIndices(index: int, hand: list[Tile]) -> list[list[int]]:
+    """
+    Checks for a the 3 possible chous (run of the same suit) in a collection of tiles
+    given the index.
+
+    Params:
+    -------------
+    `hand`: the collection of tiles in which you're looking for a chou
+    `index`:the index of a tile that exists in `hand`
+
+    Returns:
+    ---------------
+    A list of listed index values that form a chou in the `hand`
+    First entry: 3 index values that form a "XOO" chou
+    Second entry: 3 index values that form a "OOX" chou
+    Third entry: 3 index values that form a "OXO" chou
+    """
+    if index < 0:  # to support negative index
+        index = len(hand) + index  # example -1: 16 - 1 = 15
+    meldIndices = [None] * 3  # -1 are placeholders -_-
+
+    greedyIndex = getChouComponents(index, hand)
+
     if (greedyIndex[0] is not None) & (greedyIndex[1] is not None):  # has +1 +2
         meldIndices[0] = [index, greedyIndex[0], greedyIndex[1]]  # XOO
     if (greedyIndex[2] is not None) & (greedyIndex[3] is not None):  # has -1 -2
@@ -98,7 +108,8 @@ def getOfAKindIndices(
 
     Returns
     -----------
-    a list of the first n tiles it finds that match hand[index]"""
+    a list of the first n tiles it finds that match hand[index].
+    [None, None, None] if no chous"""
     assert OfAKind in range(2, Deck.NUMCOPIES + 1)  # for pairs - 2, pongs - 3, kongs -4
     matchIndices = []
     matchTile = hand[index]

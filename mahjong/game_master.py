@@ -2,6 +2,9 @@
 
 from deck import Deck
 from player import Player
+from player_ai import PlayerAI
+from player_human import PlayerHuman
+from tile import Tile
 import check_win as check_win
 import random
 
@@ -26,16 +29,17 @@ class GameMaster:
     - `endgame`
     - `takeTurn`
     - `_discardFromPlayer`
-    - `_checkLegalMove`
+    - `_checkLegalDraw`
     - `_callForDiscard`
     - `_advanceToNextMove`
 
     """
 
-    def __init__(self, customNames=False) -> None:
+    def __init__(self, playerDictionary: dict[str:str], NUMPLAYERS=4) -> None:
 
         self.status = "playing"
         self.test = True
+        self.turn_count = 0  # set right before discard; helps with debugging
 
         # Initiate Deck
         self.gameDeck = Deck()
@@ -44,19 +48,13 @@ class GameMaster:
 
         # Initiate Players
         self.playerList = []
-        NUMPLAYERS = 4
-        if customNames:
-            for i in range(NUMPLAYERS):
-                queryNameString = "Enter name for player {num}:".format(num=i)
-                thisName = input(queryNameString)
-                assert thisName not in [
-                    player.name for player in self.playerList
-                ]  # avoids duplication
-                self.playerList.append(Player(thisName))
-        else:
-            defaultNames = ["PlayerN", "PlayerE", "PlayerS", "PlayerW"]
-            for i in range(NUMPLAYERS):
-                self.playerList.append(Player(defaultNames[i]))
+
+        assert len(playerDictionary.items()) == NUMPLAYERS
+        for player_name, player_type in playerDictionary.items():
+            if player_type == "ai":
+                self.playerList.append(PlayerAI(player_name, self))
+            elif player_type == "human":
+                self.playerList.append(PlayerHuman(player_name, self))
 
         # Decide who goes first
         self.activePlayer = random.sample(self.playerList, 1)[0]
@@ -84,8 +82,11 @@ class GameMaster:
 
     def endgame(self, winner: Player) -> None:
         """Right before ending the game, show the winning hand and player's name"""
-        print(winner.name)
-        print("Winning Hand", winner.displayHand())
+        if winner is None:
+            print("Everyone lost.")
+        else:
+            print(winner.name)
+            print("Winning Hand", winner.displayHand())
         self.status = "finished"
         input()  # wait for input before clearing
 
@@ -102,9 +103,10 @@ class GameMaster:
         """
         discardChoice = self.activePlayer.get_discard_input()
         self.graveyard.append(self.activePlayer.hand.pop(discardChoice - 1))
+        print(f"{self.activePlayer.name} discarded {self.graveyard[-1]}.")
 
-    def _checkLegalMove(
-        self, moveType: int, player: Player, indexList: list[int]
+    def _checkLegalDraw(
+        self, moveType: int, player: Player, drawTile: Tile
     ) -> tuple[bool, list[int]]:
         """Function checks whether each is legal given an integer from 1 to 5 which corresponse to the following
         - 5: Mahjong
@@ -122,44 +124,44 @@ class GameMaster:
 
         - moveType: 1-5 corresponding to preference
         - player : who we're checking for
-        - indexList : If there's a legal move, what tiles is it using so
-        we can potentially move it to player.lockedTiles`
+        - drawTile: imagine adding 1 tile before checking legality of moveType
 
         Returns:
         -----------
 
-        A tuple containing whether move is legal and a modified indexList
+        A tuple containing whether move is legal and an indexList, the set of legal tiles to operate the moveType.
 
+        One use will be to move all legal tiles to `player.lockedTiles`
         """
+        indexList = None
         legal = False
-        # check legal move
-        ofAKind = check_win.getOfAKindIndices(
-            -1, player.hand + [self.graveyard[-1]]
-        )  # done so that if ultimately appended indices correct
+        is_human = isinstance(player, PlayerHuman)
+        # check number of matching with discarded tile
+        ofAKind = check_win.getOfAKindIndices(-1, player.hand + [drawTile])
         matchCount = len(ofAKind)
 
         if moveType == 5:  # Mahjong
             legal = check_win.checkMahjong(
-                player.getEffectiveHand() + [self.graveyard[-1]]
+                player.getEffectiveHand() + [drawTile]
             )  # TODO: player.getEffectiveHand isn't returninga s expected
-            if not legal:
+            if not legal and is_human:
                 # TODO: no appended to indexList, how are transfers handled. WE wanted to transfer before endgame so that...
                 print("No legal mahjong.")
         elif moveType == 4:  # Kong
             if matchCount == 4:
-                indexList.append(ofAKind)  # queue kong to remove to locked
+                indexList = ofAKind  # queue kong to remove to locked
                 legal = True  # TODO: somehow kong got passed even though not legal.
-            else:
+            elif is_human:
                 print("No legal kongs.")
         elif moveType == 3:  # Pong
             if matchCount > 2:
-                indexList.append(ofAKind[0:3])
+                indexList = ofAKind[0:3]
                 legal = True
-            else:
+            elif is_human:
                 print("No legal pongs.")
         elif moveType == 2:  # Chou
             chouIndices = check_win.getChouIndices(
-                -1, player.hand + [self.graveyard[-1]]
+                -1, player.hand + [drawTile]
             )  # TODO: ensure inability to throw something you just needed to pick up (newly locked tiles)
             if not (chouIndices == [None] * 3):
                 if self._peakNextClockwisePlayer()[0].name == player.name:
@@ -180,17 +182,17 @@ class GameMaster:
                                     "Which chou do you want? 0 for XOO, 1 for OOX, 2 for OXO"
                                 )
                             )
-                        indexList.append(chouIndices[chouPref])
+                        indexList = chouIndices[chouPref]
                         legal = True
                     else:
-                        indexList.append(chouIndices[fakes.index(False)])
+                        indexList = chouIndices[fakes.index(False)]
                         legal = True
-                else:
+                elif is_human:
                     print("Your turn isn't next.")
-            else:
+            elif is_human:
                 print("No legal chous.")
         else:  # Pass
-            indexList.append(None)
+            indexList = None
             legal = True
         return legal, indexList
 
@@ -203,33 +205,33 @@ class GameMaster:
         List (in order of self.playerList) of integers representing which of the 5 move options
         they want to do with the current most recently discarded tile.
         """
-        # Calling for Discarded Tile
+
+        # Store what each player would like to do using 1-5
         prefList = []
-        indexList = (
-            []
-        )  # place to store each player's final desired operation for locked tile transfer.
+
+        # place to store how each player's collection of tiles for their desired operation
+        prefIndexList: list[list[int]] = []
+
         for player in self.playerList:
+
+            # Person who discarded automatically passes
             if player.name == self.activePlayer.name:
                 prefList.append(1)
-                indexList.append(None)
+                prefIndexList.append(None)
                 continue
-            print(self.graveyard[-1].displayTile())
-            print(f"\n{player.name}'s Hand:")
-            print(player.displayHand())
-            prompt = f"{player.name} choose between options 1-5 for {str(self.graveyard[-1])}:\n5: Mahjong\n4: Kong\n3: Pong\n2: Chou\n1: Pass\n"
+
+            # Other players get to express preference
             legal = False
             while not legal:
-                preference = 0
-                while (preference <= 0) or (preference >= 6):
-                    while True:
-                        try:
-                            preference = int(input(prompt))
-                            break
-                        except ValueError:
-                            print("Not a number.")
-                legal, indexList = self._checkLegalMove(preference, player, indexList)
+                preference = player.get_draw_preference(last_tile=self.graveyard[-1])
+                legal, indexList = self._checkLegalDraw(
+                    moveType=preference, player=player, drawTile=self.graveyard[-1]
+                )
+                # For human players print a message, for AI set a flag
+                player.draw_pref_feedback(legal, preference)
             prefList.append(preference)  # in order of self.playerlist
-        return prefList, indexList
+            prefIndexList.append(indexList)
+        return prefList, prefIndexList
 
     def _advanceToNextMove(
         self, prefList: list[int], indexList: list[list[int]]
@@ -241,7 +243,10 @@ class GameMaster:
         if sum(prefList) == len(prefList):
             self._advanceNextClockwisePlayer()
             print(f"Now {self.activePlayer.name}'s Turn. Drew from deck.")
-            self.gameDeck.moveNRandom(1, self.activePlayer.hand)
+            successful_transfer = self.gameDeck.moveNRandom(1, self.activePlayer.hand)
+            if not successful_transfer:
+                print("Ending game due to lack of tiles in stock")
+                self.endgame(winner=None)
 
         else:
             # reorder Player and Preference lists such that next player is first (to help break ties in preference)
@@ -266,7 +271,7 @@ class GameMaster:
                 self.graveyard.pop(-1)
             )  # TODO: somehow reorder the indices right to actually get ordered meld to locked tiles.
             print(
-                f"{self.activePlayer.name} got {self.activePlayer.hand[-1]} from graveyard."
+                f"{self.activePlayer.name} got {self.activePlayer.hand[-1]}from graveyard."
             )
 
             # move the drawn move to the lockedTiles
@@ -289,6 +294,8 @@ class GameMaster:
         Finally the CW player draws from the deck or someone got the grave tile.ctive player is adjusted accordingly.
         Checks whether someone won this turn.
         """
+        self.turn_count += 1
+        print(f"Turn {self.turn_count}-{self.activePlayer.name}:")
         self._discardFromPlayer()
         prefList, indexList = self._callForDiscard()
         self._advanceToNextMove(prefList, indexList)
