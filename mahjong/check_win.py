@@ -22,13 +22,14 @@ def fillNone(suit: str, rank: int, adj: int) -> Tile | None:
     """
     try:
         return Tile(suit, rank + adj)
-    except:
+    except ValueError:
         return None
 
 
-def getChouIndices(index: int, hand: list[Tile]) -> list[int]:
+def getChouIndices(index: int, hand: list[Tile]) -> list[list[int]]:
     """
-    Checks for a chou (run of the same suit) in a collection of tiles
+    Checks for a the 3 possible chous (run of the same suit) in a collection of tiles
+    given the index.
 
     Params:
     -------------
@@ -37,16 +38,28 @@ def getChouIndices(index: int, hand: list[Tile]) -> list[int]:
 
     Returns:
     ---------------
-    A list of index values that form a chou in the `hand`
+    A list of listed index values that form a chou in the `hand`
+    First entry: 3 index values that form a "XOO" chou
+    Second entry: 3 index values that form a "OOX" chou
+    Third entry: 3 index values that form a "OXO" chou
     """
     if index < 0:  # to support negative index
         index = len(hand) + index  # example -1: 16 - 1 = 15
-    legal = False
     meldIndices = [None] * 3  # -1 are placeholders -_-
     discardRank = hand[index].rank
     discardSuit = hand[index].suit
 
-    rankAdjustments = [+1, +2, -1, -2, -1, +1]
+    # Collection of tiles to form (5,6,7) (6,7,8) (7,8,9)
+    rankAdjustments = [  # e.g 7
+        +1,  # 8
+        +2,  # 9
+        -1,  # 6
+        -2,  # 5
+        -1,  # 6
+        +1,  # 8
+    ]
+
+    # creates tiles from six above. > 9 or <1 not allowed.
     relevantTiles = list(
         map(
             lambda x: fillNone(suit=discardSuit, rank=discardRank, adj=x),
@@ -54,16 +67,18 @@ def getChouIndices(index: int, hand: list[Tile]) -> list[int]:
         )
     )
 
+    # stores whether each relevantTile exists
     greedyIndex = [None] * 6
     for cnt in range(len(hand)):
         for cnt2 in range(len(relevantTiles)):
             if relevantTiles[cnt2] == hand[cnt]:
                 greedyIndex[cnt2] = cnt
-    if (greedyIndex[0] != None) & (greedyIndex[1] != None):  # adding only complete
+
+    if (greedyIndex[0] is not None) & (greedyIndex[1] is not None):  # has +1 +2
         meldIndices[0] = [index, greedyIndex[0], greedyIndex[1]]  # XOO
-    if (greedyIndex[2] != None) & (greedyIndex[3] != None):
+    if (greedyIndex[2] is not None) & (greedyIndex[3] is not None):  # has -1 -2
         meldIndices[1] = [index, greedyIndex[2], greedyIndex[3]]  # OOX
-    if (greedyIndex[4] != None) & (greedyIndex[5] != None):
+    if (greedyIndex[4] is not None) & (greedyIndex[5] is not None):  # has +1 -1
         meldIndices[2] = [index, greedyIndex[4], greedyIndex[5]]  # OXO
 
     return meldIndices
@@ -93,7 +108,6 @@ def getOfAKindIndices(
     return matchIndices
 
 
-@lru_cache()
 def checkMahjongMelds(
     hand: list[Tile], recursionCounter=0, meldCount=0, pairCount=0
 ) -> tuple[
@@ -146,7 +160,7 @@ def checkMahjongMelds(
     for index in range(len(hand)):  # take a tile
         chouIndices = getChouIndices(index, hand)  # all possible chou role positions
         for thrupplePosInd in [
-            i for i in chouIndices if i != None
+            i for i in chouIndices if i is not None
         ]:  # greedy find indices for following 3 chou caes: XOO OXO or OOX
             # pop the respective chou role
             handSmall = [
@@ -255,7 +269,7 @@ def checkMahjongPairs(
                 index, hand
             )  # all possible chou role positions
             for thrupplePosInd in [
-                i for i in chouIndices if i != None
+                i for i in chouIndices if i is not None
             ]:  # greedy find indices for following 3 chou caes: XOO OXO or OOX
                 # pop the respective chou role
                 handSmall = [

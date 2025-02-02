@@ -1,79 +1,80 @@
 """Tests related to the game_master module"""
 
-from unittest.mock import patch
+import pytest
+from unittest.mock import MagicMock, patch
 from game_master import GameMaster
+from deck import Deck
 
 
-# Test function (no need for classes with pytest)
+# Fixture for mocking Deck
+@pytest.fixture  # TODO: use/Implement
+def mock_deck():
+    mock_deck = MagicMock(spec=Deck)
+    return mock_deck
+
+
+# Fixture for initializing a GameMaster object
+@pytest.fixture
 @patch("builtins.input", side_effect=["Mom", "Dad", "Sister", "Brother"])
-def test_GameMaster_init(mock_input):
-    # Create the GameMaster instance with custom names
-    with_names = GameMaster(customNames=True)
+def with_names(mock_input):
+    return GameMaster(customNames=True)
 
+
+def test_GameMaster_init(with_names):
     # Assert that the player names are correct
     assert with_names.playerList[0].name == "Mom"
     assert with_names.playerList[3].name == "Brother"
 
 
-# class ExampleTests(TestCase):
+def test_peak_next_clockwise_player(with_names):
+    actual = with_names._peakNextClockwisePlayer()[0].name
+    next_dict = {"Mom": "Dad", "Dad": "Sister", "Sister": "Brother", "Brother": "Mom"}
+    expected = next_dict[with_names.activePlayer.name]
+    assert expected == actual
 
 
-#     # def setUp(self):
-#         # self.game = GameMaster()
+def test_deal():
+    game_master = GameMaster(customNames=False)
 
-#     @patch('mahjong.example.input', create=True)
-#     def test_example(self, mock_input):
-#         mock_input.side_effect = ['Mom', 'Dad', 'Sister', 'Brother']
-#         res = function2()
-#         print(res)
-#         self.assertTrue(res[1]=='Mom')
+    # Mock the Deck's moveNRandom method to measure call count
+    with patch.object(Deck, "moveNRandom") as mock_move:
+        game_master.deal()
 
-#     if __name__ == '__main__':
-#         unittest.main(verbosity=True)
+        # Check that moveNRandom was called for each player
+        assert mock_move.call_count == len(game_master.playerList) + 1
 
-#     def test_lockTiles(self):
-#         #TODO: Fix/figure out how/what happened.
-#         """
-#     PlayerE's Hand:
-# Hand
-#  1 |Ball  4|
-#  2 |Ball  6|
-#  3 |Ball  6|
-#  4 |Ball  7|
-#  5 |Ball  7|
-#  6 |Ball  8|
-#  7 |Bam   3|
-#  8 |Bam   3|
-#  9 |Crack 4|
-# 10 |Crack 5|
-# 11 |Crack 6|
-# 12 |Crack 6|
-# 13 |Crack 7|
-# 14 |Crack 8|
-# 15 |Crack 8|
-# 16 |Crack 9|
-# Locked
 
-# Which chou do you want? 0 for XOO, 1 for OOX, 2 for OXO0
+def test_advance_next_clockwise_player(with_names):
+    initial_player = with_names.activePlayer
 
-#         I got multiple index choices for possible chou and picked 0
-#         PlayerE got |Crack 9|  from graveyard.
-# Hand
-#  1 |Ball  4|
-#  2 |Ball  6|
-#  3 |Ball  6|
-#  4 |Ball  7|
-#  5 |Ball  7|
-#  6 |Ball  8|
-#  7 |Bam   3|
-#  8 |Bam   3|
-#  9 |Crack 4|
-# 10 |Crack 5|
-# 11 |Crack 6|
-# 12 |Crack 8|
-# 13 |Crack 9|
-# 14 |Crack 9|
-# Locked
-# |Crack 8|
-# |Crack 7|
-# |Crack 6|"""
+    with_names._advanceNextClockwisePlayer()
+
+    # Check that the active player has moved to the next player
+    assert with_names.activePlayer != initial_player
+    assert with_names.playerList.index(with_names.activePlayer) == (
+        (with_names.playerList.index(initial_player) + 1) % len(with_names.playerList)
+    )
+
+
+@pytest.mark.parametrize(
+    "move_type, expected_result",
+    [
+        (5, True),  # Mahjong
+        (4, True),  # Kong
+        (3, True),  # Pong
+        (2, True),  # Chou
+        (1, True),  # Pass
+    ],
+)
+def test_check_legal_move(game_master, move_type, expected_result):
+    """TODO: Implement by checking all 5 numbers for a given hand"""
+
+    player = game_master.playerList[0]
+
+    with patch(
+        "check_win.checkMahjong", return_value=True
+    ), patch(  # TODO: Make this more realistic
+        "check_win.getOfAKindIndices", return_value=[1, 2, 3]
+    ):
+        legal, index_list = game_master._checkLegalMove(move_type, player, [])
+        assert legal == expected_result

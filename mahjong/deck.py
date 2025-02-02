@@ -25,10 +25,10 @@ class Deck:  # todo: finish docstring
                 for copy in range(self.NUMCOPIES):
                     self.stock.append(Tile(suit, rank))
 
-    def shuffle(self, test=False):
+    def shuffle(self, test=False, test_seed=20):
         """Mixes the order of the deck"""
         if test:
-            random.seed(20)
+            random.seed(test_seed)
         random.shuffle(self.stock)
 
     def moveNRandom(self, n: int, target: list[Tile], test=False) -> None:

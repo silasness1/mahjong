@@ -1,3 +1,5 @@
+"""TODO: use inheritance to define two subclasses human and AI players"""
+
 from tile import Tile
 
 
@@ -81,3 +83,21 @@ class Player:  # maybe deck and players inherit from tile collections
                 + "\nHand:   \n"
                 + handDisplay
             )
+
+    def get_discard_input(self):
+        """For human players enter a number to indicate which part of your hand to get rid of."""
+        while True:
+            print(self.displayHand())
+            try:
+                discardChoice = int(
+                    input(f"Enter 1 to {len(self.hand)} of which card to discard: ")
+                )
+            except ValueError:
+                print("Not an integer.")
+                continue
+            if not ((discardChoice >= 1) and (discardChoice <= len(self.hand))):
+                print("Not in proper range. ")
+                continue
+            else:
+                break
+        return discardChoice

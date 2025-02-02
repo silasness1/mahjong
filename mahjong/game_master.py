@@ -37,7 +37,7 @@ class GameMaster:
         self.status = "playing"
         self.test = True
 
-        # Initiate Deck & TODO: Figure out the context for why I wrote this Tiles
+        # Initiate Deck
         self.gameDeck = Deck()
         self.gameDeck.shuffle()
         self.graveyard = []  # For discarded tiles, behaves like stack
@@ -48,9 +48,10 @@ class GameMaster:
         if customNames:
             for i in range(NUMPLAYERS):
                 queryNameString = "Enter name for player {num}:".format(num=i)
-                thisName = input(
-                    queryNameString
-                )  # TODO: make sure no duplicate names to spoof chou privledges
+                thisName = input(queryNameString)
+                assert thisName not in [
+                    player.name for player in self.playerList
+                ]  # avoids duplication
                 self.playerList.append(Player(thisName))
         else:
             defaultNames = ["PlayerN", "PlayerE", "PlayerS", "PlayerW"]
@@ -96,23 +97,10 @@ class GameMaster:
         self.gameDeck.moveNRandom(1, self.activePlayer.hand)  # starting player gets 17
 
     def _discardFromPlayer(self) -> None:
-        """Gets input from active player and moves the selected tile to the graveyard."""
-        while True:
-            print(self.activePlayer.displayHand())
-            try:
-                discardChoice = int(
-                    input(
-                        f"Enter 1 to {len(self.activePlayer.hand)} of which card to discard: "
-                    )
-                )
-            except ValueError:
-                print("Not an int.")
-                continue
-            if not ((discardChoice >= 1) and (discardChoice <= 17)):
-                print("not in proper range. ")
-                continue
-            else:
-                break
+        """Gets input from active player and moves the selected tile to the graveyard.
+        TODO: have to call a method from player in order to get input so that we can override it for non-human players.
+        """
+        discardChoice = self.activePlayer.get_discard_input()
         self.graveyard.append(self.activePlayer.hand.pop(discardChoice - 1))
 
     def _checkLegalMove(
@@ -126,6 +114,8 @@ class GameMaster:
         - 1: Pass
 
         DONT be tempted to make this a static method. Requires knowledge of game state (Player order and graveyard)
+
+        TODO: Actually just pass a boolean about whether this is the next player and what the last graveyard tile was.
 
         Params:
         -----------
@@ -141,6 +131,7 @@ class GameMaster:
         A tuple containing whether move is legal and a modified indexList
 
         """
+        legal = False
         # check legal move
         ofAKind = check_win.getOfAKindIndices(
             -1, player.hand + [self.graveyard[-1]]
