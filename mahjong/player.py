@@ -42,6 +42,11 @@ class Player:  # maybe deck and players inherit from tile collections
         for tile in self.hand:
             printString += str(tile)
 
+        printString += " Locked Tiles: "
+        for tile in self.lockedTiles:
+            printString += str(tile)
+        return printString
+
     def getEffectiveHand(self) -> list[Tile]:
         """Returns the tiels in both `hand` and `lockedTiles`"""
         effective = self.hand + self.lockedTiles

@@ -141,3 +141,31 @@ def hand_chou_draw_issue():
         Tile("Ball", 9),  # Ball 9
     ]
     return hand
+
+
+@pytest.fixture
+def false_mahjong_identification():
+    """Check Mahjong wasn't respecting the locked tiles."""
+    hand = [
+        Tile("Bam", 8),  # 1
+        Tile("Bam", 9),  # 2
+        Tile("Crack", 3),  # 3
+        Tile("Ball", 5),  # 4
+        Tile("Ball", 4),  # 5
+        Tile("Ball", 6),  # 6
+        Tile("Crack", 1),  # 7
+        Tile("Ball", 2),  # 8
+        Tile("Ball", 2),  # 9
+        Tile("Ball", 2),  # 10
+        Tile("Crack", 5),  # 11
+        Tile("Crack", 5),  # 12
+        Tile("Crack", 5),  # 13
+        Tile("Crack", 2),  # 14
+        Tile("Crack", 3),  # 15
+        Tile("Crack", 4),  # 16
+        Tile("Bam", 7),  # 17
+    ]
+    return hand
+
+
+"Player3:|Crack 5| |Crack 5| |Crack 5| |Crack 2| |Crack 3| |Crack 4| "

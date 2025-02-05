@@ -231,6 +231,15 @@ class GameMaster:
                 player.draw_pref_feedback(legal, preference)
             prefList.append(preference)  # in order of self.playerlist
             prefIndexList.append(indexList)
+
+        msg = "Index List is showing no tile transfers even though pref list has non-pass move."
+        if prefList != [1, 1, 1, 1]:
+            assert prefIndexList != [
+                None,
+                None,
+                None,
+                None,
+            ], msg
         return prefList, prefIndexList
 
     def _advanceToNextMove(

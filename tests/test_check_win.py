@@ -33,6 +33,7 @@ def test_check_win_melds(
     hand_meldwise_mahjong_unordered_true,
     hand_meldwise_mahjong_ordered_true,
     hand_meldwise_mahjong_true_wrongturn,
+    false_mahjong_identification,
 ):
     """Assumes first word is false or true, then checks for mahjong."""
     param_dict = locals()
@@ -42,9 +43,9 @@ def test_check_win_melds(
     for i in range(len(fixtures)):
         result = check_win.checkMahjong(fixtures[i])
         if "false" in fixture_names[i]:
-            assert result[0] is False
+            assert result is False, fixture_names[i]
         if "true" in fixture_names[i]:
-            assert result is True
+            assert result is True, fixture_names[i]
 
 
 def test_checkWinMelds_fourPairs():  # TODO: TEST restriction on number of pairs (or kongs?), already restricted.
