@@ -28,7 +28,7 @@ def survey_player_settings(NUMPLAYERS=4) -> dict:
 
 
 default_player_dict = {
-    "Player1": "ai",
+    "Silas": "human",
     "Player2": "ai",
     "Player3": "ai",
     "Player4": "ai",
@@ -37,7 +37,7 @@ default_player_dict = {
 
 def start(input_settings=False):
     print("STARTING GAME")
-    random.seed(10)  # TODO: eventually remove
+    random.seed(15)  # was 10
     if input_settings:
         game = GameMaster(survey_player_settings())
     else:

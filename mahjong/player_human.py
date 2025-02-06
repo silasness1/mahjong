@@ -44,3 +44,18 @@ class PlayerHuman(Player):
                 except ValueError:
                     print("Not a number.")
         return preference
+
+    def get_chou_type(self) -> int:
+        CHOU_CHOICE = "Which chou do you want? 0 for XOO, 1 for OOX, 2 for OXO"
+
+        chouPref = None
+
+        while chouPref not in [0, 1, 2]:
+            chouPref = input(CHOU_CHOICE)
+
+            try:
+                chouPref = int(chouPref)
+            except TypeError:
+                print("Not an integer")
+
+        return chouPref

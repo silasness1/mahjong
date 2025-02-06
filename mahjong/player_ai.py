@@ -50,3 +50,6 @@ class PlayerAI(Player):
     def draw_pref_feedback(self, success: int, preference: int):
         """Keeps record of last draw preference to so `get_draw_preference()` can try 5 to 1"""
         self.last_pref = (success, preference)
+
+    def get_chou_type(self) -> int:
+        return random.randint(0, 2)

@@ -136,6 +136,7 @@ class GameMaster:
         indexList = None
         legal = False
         is_human = isinstance(player, PlayerHuman)
+
         # check number of matching with discarded tile
         ofAKind = getOfAKindIndices(-1, player.hand + [drawTile])
         matchCount = len(ofAKind)
@@ -169,19 +170,14 @@ class GameMaster:
                         i is None for i in chouIndices
                     ]  # seems wrong during debug?
                     if sum(fakes) < 2:  # two or three options
-                        chouPref = int(
-                            input(
-                                "Which chou do you want? 0 for XOO, 1 for OOX, 2 for OXO"
-                            )
-                        )  # TODO: validate input; also appears to be broken. It locked tiles that weren't even one of the options.
-                        while not isinstance(
-                            chouIndices[chouPref], list
-                        ):  # prevents illegal options being none
-                            chouPref = int(
-                                input(
-                                    "Which chou do you want? 0 for XOO, 1 for OOX, 2 for OXO"
-                                )
-                            )
+
+                        # TODO: validate input; also appears to be broken. It locked tiles that weren't even one of the options.
+
+                        chouPref = player.get_chou_type()  # init while loop
+                        # prevents illegal options being none
+                        while chouIndices[chouPref] is None:
+                            chouPref = player.get_chou_type()
+
                         indexList = chouIndices[chouPref]
                         legal = True
                     else:

@@ -118,6 +118,11 @@ class Player:  # maybe deck and players inherit from tile collections
         pass
 
     @abstractmethod
+    def get_chou_type(self) -> int:
+        """Deciding between multiple chou options when drawing from graveyard."""
+        pass
+
+    @abstractmethod
     def draw_pref_feedback(self, success: bool, preference: int):
         """Things to do when GameMaster indicates preference was illegal.
 
