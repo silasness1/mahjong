@@ -120,12 +120,13 @@ def getOfAKindIndices(
 
 
 def checkMahjongMelds(
-    hand: list[Tile], recursionCounter=0, meldCount=0, pairCount=0
-) -> tuple[
-    bool, int, int
-]:  # TODO: Refactor to take a player as a parameter so you can use the Tile collection methods
+    hand: list[Tile],
+    recursionCounter=0,
+    meldCount=0,
+    pairCount=0,
+) -> tuple[bool, int, int]:
     """
-    Assumes 17 tiles total.
+    Assumes 17 tiles total (aka after drawing).
 
     Algorithm overview:
     1) Take a tile
@@ -136,6 +137,7 @@ def checkMahjongMelds(
 
     Debug: one of the 7 cracks got left behind maybe because overlapping index btw chous
 
+    Adding locked-tile feature
 
     Params
     ----------
@@ -144,87 +146,108 @@ def checkMahjongMelds(
     - meldCount
     - pairCount
 
-    Should take 17, so that can be applied to calling for discard mahjong + drawing from wall
-    how to handle the lockedTiles...?
-    Need a function to return indices of potential kongs.
-    I could also just count the number of pairs as a quick dismissal.
-    bad case example: 4 pairs, and 3 melds
-
-
-    2.1) save all the eligible roles & their indices to reduce problem
-
-    Okay
-
     Returns
     --------
     A tuple that contains....
-    - a boolean indicating mahjong
+    - a boolean indicating mahjong (if subproblem, indicates popped all tiles)
     - the number of melds (moves of 3-4 tiles)
     - the number of pairs
     """
-    # meldCount = 0 #kongs should count as meld.
-    # pairCount = 0
-    # roleList = [[]] # length 17?
+
+    # Found a way to use up all the tiles
     if len(hand) == 0:
         return True, meldCount, pairCount
 
     for index in range(len(hand)):  # take a tile
         chouIndices = getChouIndices(index, hand)  # all possible chou role positions
-        for thrupplePosInd in [
-            i for i in chouIndices if i is not None
-        ]:  # greedy find indices for following 3 chou caes: XOO OXO or OOX
+
+        # greedy find indices for following 3 chou caes: XOO OXO or OOX
+        for thrupplePosInd in [i for i in chouIndices if i is not None]:
+
             # pop the respective chou role
-            handSmall = [
-                hand[index] for index in range(len(hand)) if index not in thrupplePosInd
-            ]
+            handSmall = [hand[i] for i in range(len(hand)) if i not in thrupplePosInd]
+
             # try solving the subproblem
-            theRest = checkMahjongMelds(handSmall, recursionCounter + 1)
-            if theRest[0]:
-                if theRest[1] + 1 > 5:  # edgecase: kang split between 4 melds?
+            rest_cleared, rest_melds, rest_pairs = checkMahjongMelds(
+                handSmall, recursionCounter + 1
+            )
+
+            if rest_cleared:
+
+                # too many melds
+                if rest_melds + 1 > 5:  # TODO edgecase: kang split between 4 melds?
                     return False, meldCount, pairCount
+
+                # if subproblem cleared, add a meld?!
                 else:
-                    meldCount = theRest[1] + 1
-                    pairCount = theRest[2]
+                    meldCount = rest_melds + 1
+                    pairCount = rest_pairs
+
                 return True, meldCount, pairCount
+
         # none of the chous worked out, try the Of A Kind roles
         ofAKindIndices = getOfAKindIndices(index, hand)
-        if len(ofAKindIndices) > 1:  # to filter singleton -> fail case
+
+        # No mahjongs contain tiles which aren't part of a chou and have no matches
+        if len(ofAKindIndices) <= 1:
+            return False, meldCount, pairCount
+
+        else:
             for ofAKind in [
                 ofAKindIndices[0:4],
                 ofAKindIndices[0:3],
                 ofAKindIndices[0:2],
             ]:
-                handSmall = [
-                    hand[index] for index in range(len(hand)) if index not in ofAKind
-                ]  # pop of a kind    TODO:  for pairs and triples is this repetative?
-                theRest = checkMahjongMelds(handSmall, recursionCounter + 1)
-                if theRest[0]:
+                # pop of a kind  TODO:  for pairs and triples is this repetative?
+                handSmall = [hand[i] for i in range(len(hand)) if i not in ofAKind]
+
+                rest_cleared, rest_melds, rest_pairs = checkMahjongMelds(
+                    handSmall, recursionCounter + 1
+                )
+
+                if rest_cleared:
+
                     # update recursion ladder back w meld, pair counts
                     if len(ofAKind) == 2:
-                        if theRest[2] + 1 > 1:  # no more than 1 pair allowed
+
+                        # no more than 1 pair allowed
+                        if rest_pairs + 1 > 1:
                             return False, meldCount, pairCount
+
+                        # update pair couunt
                         else:
-                            pairCount = theRest[2] + 1
-                            meldCount = theRest[1]
+                            pairCount = rest_pairs + 1
+                            meldCount = rest_melds
                             return True, meldCount, pairCount
+
+                    # ofAKind is a tripple or kong - both melds
                     else:
-                        if theRest[1] + 1 > 5:
+
+                        # too many melds
+                        if rest_melds + 1 > 5:
                             return False, meldCount, pairCount
+
+                        # otherise add it to the count
                         else:
-                            meldCount += theRest[1] + 1
-                            pairCount = theRest[2]
+                            meldCount += rest_melds + 1
+                            pairCount = rest_pairs
                             return True, meldCount, pairCount
+
+                # Cases where the rest is false. not sure about this one.
+                # First recursion? Catches case that there's another misfit tile somewhere
+                # (it's not the first one though). later recursions?
                 return (
                     False,
                     meldCount,
                     pairCount,
-                )  # Cases where the rest is false. not sure about this one. First recursion? Catches case that there's another misfit tile somewhere(it's not the first one though). later recursions?
-        else:
-            return False, meldCount, pairCount
+                )
 
 
 def checkMahjongPairs(
-    hand: list[Tile], _recursionCounter=0, meldCount=0, pairCount=0
+    hand: list[Tile],
+    _recursionCounter=0,
+    meldCount=0,
+    pairCount=0,
 ) -> tuple[bool, int, int]:
     """Looks for the type of mahjong with 7 pairs and 1 meld
 
@@ -300,8 +323,8 @@ def checkMahjongPairs(
             return False, meldCount, pairCount  # singletons with no working chous
 
 
-def checkMahjong(hand: list[Tile]) -> bool:
+def checkMahjong(hand: list[Tile], lockedMelds: int) -> bool:
     """Returns true or false that the `hand` contains either kind of mahjong"""
-    meld = checkMahjongMelds(hand)
-    pair = checkMahjongPairs(hand)
+    meld = checkMahjongMelds(hand, meldCount=lockedMelds)
+    pair = checkMahjongPairs(hand, meldCount=lockedMelds)
     return (meld == (True, 5, 1)) or (pair == (True, 1, 7))

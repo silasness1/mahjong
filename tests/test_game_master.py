@@ -17,7 +17,8 @@ from deck import Deck
 @pytest.fixture
 @patch("builtins.input", side_effect=["Mom", "Dad", "Sister", "Brother"])
 def with_names(mock_input):
-    return GameMaster(customNames=True)
+    family_dict = {"Mom": "ai", "Dad": "ai", "Sister": "ai", "Brother": "ai"}
+    return GameMaster(family_dict)
 
 
 def test_GameMaster_init(with_names):
@@ -33,15 +34,13 @@ def test_peak_next_clockwise_player(with_names):
     assert expected == actual
 
 
-def test_deal():
-    game_master = GameMaster(customNames=False)
-
+def test_deal(with_names):
     # Mock the Deck's moveNRandom method to measure call count
     with patch.object(Deck, "moveNRandom") as mock_move:
-        game_master.deal()
+        with_names.deal()
 
         # Check that moveNRandom was called for each player
-        assert mock_move.call_count == len(game_master.playerList) + 1
+        assert mock_move.call_count == len(with_names.playerList) + 1
 
 
 def test_advance_next_clockwise_player(with_names):
@@ -56,25 +55,25 @@ def test_advance_next_clockwise_player(with_names):
     )
 
 
-@pytest.mark.parametrize(
-    "move_type, expected_result",
-    [
-        (5, True),  # Mahjong
-        (4, True),  # Kong
-        (3, True),  # Pong
-        (2, True),  # Chou
-        (1, True),  # Pass
-    ],
-)
-def test_check_legal_move(game_master, move_type, expected_result):
-    """TODO: Implement by checking all 5 numbers for a given hand"""
-    pass
-    # player = game_master.playerList[0]
+# @pytest.mark.parametrize(
+#     "move_type, expected_result",
+#     [
+#         (5, True),  # Mahjong
+#         (4, True),  # Kong
+#         (3, True),  # Pong
+#         (2, True),  # Chou
+#         (1, True),  # Pass
+#     ],
+# )
+# def test_check_legal_move(game_master, move_type, expected_result):
+#     """TODO: Implement by checking all 5 numbers for a given hand"""
+#     pass
+# player = game_master.playerList[0]
 
-    # with patch(
-    #     "check_win.checkMahjong", return_value=True
-    # ), patch(  # TODO: Make this more realistic
-    #     "check_win.getOfAKindIndices", return_value=[1, 2, 3]
-    # ):
-    #     legal, index_list = game_master._checkLegalDraw(move_type, player, )
-    #     assert legal == expected_result
+# with patch(
+#     "check_win.checkMahjong", return_value=True
+# ), patch(  # TODO: Make this more realistic
+#     "check_win.getOfAKindIndices", return_value=[1, 2, 3]
+# ):
+#     legal, index_list = game_master._checkLegalDraw(move_type, player, )
+#     assert legal == expected_result

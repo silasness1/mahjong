@@ -22,6 +22,7 @@ class Player:  # maybe deck and players inherit from tile collections
     - `hand`: a list of tiles
     - `lockedTiles`: cards drawn from graveyard/kongs prevents reorganizing
     - `name`: the player's name
+    - `lockedMelds`: an int indicating how many times a meld has been added to locked
     """
 
     def __init__(self, name: str, game_master: "GameMaster") -> None:
@@ -30,6 +31,9 @@ class Player:  # maybe deck and players inherit from tile collections
 
         # for drawing from graveyard or kongs, prevents reorganizing in checking for mahjong
         self.lockedTiles = []
+
+        # lockedMelds
+        self.lockedMelds = 0
 
         # player name
         self.name: str = name

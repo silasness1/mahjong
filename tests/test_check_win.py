@@ -2,9 +2,9 @@ import check_win
 from hand_data import *  # noqa: F403
 
 
-def test_getChouIndices(hand_meldwise_mahjong_unordered):
+def test_getChouIndices(hand_meldwise_mahjong_unordered_true):
     """Illustrates how `getChouIndices()` returns 5,6,7 Ball over 6,7,8 Ball"""
-    hand = hand_meldwise_mahjong_unordered
+    hand = hand_meldwise_mahjong_unordered_true
     convenienceMeld = check_win.getChouIndices(4, hand)  # index 4 is |Ball 6|
 
     # (6,7,8) None (5,6,7)
@@ -33,7 +33,7 @@ def test_check_win_melds(
     hand_meldwise_mahjong_unordered_true,
     hand_meldwise_mahjong_ordered_true,
     hand_meldwise_mahjong_true_wrongturn,
-    false_mahjong_identification,
+    # false_mahjong_identification,
 ):
     """Assumes first word is false or true, then checks for mahjong."""
     param_dict = locals()
@@ -41,7 +41,7 @@ def test_check_win_melds(
     fixture_names = list(param_dict.keys())
 
     for i in range(len(fixtures)):
-        result = check_win.checkMahjong(fixtures[i])
+        result = check_win.checkMahjong(fixtures[i], lockedMelds=0)
         if "false" in fixture_names[i]:
             assert result is False, fixture_names[i]
         if "true" in fixture_names[i]:

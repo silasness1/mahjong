@@ -5,7 +5,7 @@ from player import Player
 from player_ai import PlayerAI
 from player_human import PlayerHuman
 from tile import Tile
-import check_win as check_win
+from check_win import checkMahjong, getOfAKindIndices, getChouIndices
 import random
 
 
@@ -137,15 +137,15 @@ class GameMaster:
         legal = False
         is_human = isinstance(player, PlayerHuman)
         # check number of matching with discarded tile
-        ofAKind = check_win.getOfAKindIndices(-1, player.hand + [drawTile])
+        ofAKind = getOfAKindIndices(-1, player.hand + [drawTile])
         matchCount = len(ofAKind)
 
         if moveType == 5:  # Mahjong
-            legal = check_win.checkMahjong(
-                player.getEffectiveHand() + [drawTile]
-            )  # TODO: player.getEffectiveHand isn't returninga s expected
+
+            # TODO: player.getEffectiveHand isn't returninga s expected
+            legal = checkMahjong(player.hand + [drawTile], player.lockedMelds)
+
             if not legal and is_human:
-                # TODO: no appended to indexList, how are transfers handled. WE wanted to transfer before endgame so that...
                 print("No legal mahjong.")
         elif moveType == 4:  # Kong
             if matchCount == 4:
@@ -160,7 +160,7 @@ class GameMaster:
             elif is_human:
                 print("No legal pongs.")
         elif moveType == 2:  # Chou
-            chouIndices = check_win.getChouIndices(
+            chouIndices = getChouIndices(
                 -1, player.hand + [drawTile]
             )  # TODO: ensure inability to throw something you just needed to pick up (newly locked tiles)
             if not (chouIndices == [None] * 3):
@@ -274,28 +274,29 @@ class GameMaster:
             relArgMax = relativePrefList.index(realMax)
             prefWinnerIndex = self.playerList.index(relativePlayerList[relArgMax])
 
-            # give the preference winner becomes active player and gets the last tile
+            # The preference winner becomes active player and gets the last tile
+            # TODO: somehow reorder the indices right to actually get ordered meld to locked tiles.
             self.activePlayer = self.playerList[prefWinnerIndex]
-            self.activePlayer.hand.append(
-                self.graveyard.pop(-1)
-            )  # TODO: somehow reorder the indices right to actually get ordered meld to locked tiles.
+            self.activePlayer.hand.append(self.graveyard.pop(-1))
             print(
                 f"{self.activePlayer.name} got {self.activePlayer.hand[-1]}from graveyard."
             )
 
-            # move the drawn move to the lockedTiles
+            # assemble the tiles that need to get locked
             toTransfer = indexList[prefWinnerIndex]
             transferSet = set(toTransfer)
             tilesToLock = [
                 e for i, e in enumerate(self.activePlayer.hand) if i in transferSet
             ]
-            assert (
-                len(tilesToLock) > 0
-            )  # when obtained from graveyard and not mahjong... something has to go to locked pong or chou.
+            assert len(tilesToLock) > 0, "Moved 0 tiles into locked."
+            # Add to locked
             self.activePlayer.lockedTiles += tilesToLock
+            # Get rid of them from hand
             self.activePlayer.hand = [
                 e for i, e in enumerate(self.activePlayer.hand) if i not in transferSet
             ]
+            # all grave -> locked are melds, helps with mahjong check
+            self.activePlayer.lockedMelds += 1
 
     def takeTurn(self) -> None:
         """Turn starts with one player discarding a tile,
@@ -308,7 +309,7 @@ class GameMaster:
         self._discardFromPlayer()
         prefList, indexList = self._callForDiscard()
         self._advanceToNextMove(prefList, indexList)
-        if check_win.checkMahjong(self.activePlayer.getEffectiveHand()):
-            self.endgame(
-                winner=self.activePlayer
-            )  # CW player won from deck or prefWinner got mahjong with grave tile
+        # CW player won from deck or prefWinner got mahjong with grave tile
+        won = checkMahjong(self.activePlayer.hand, self.activePlayer.lockedMelds)
+        if won:
+            self.endgame(winner=self.activePlayer)
