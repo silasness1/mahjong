@@ -35,11 +35,14 @@ class GameMaster:
 
     """
 
-    def __init__(self, playerDictionary: dict[str:str], NUMPLAYERS=4) -> None:
+    def __init__(
+        self, playerDictionary: dict[str:str], NUMPLAYERS: int = 4, wait_on_end=True
+    ) -> None:
 
         self.status = "playing"
         self.test = True
         self.turn_count = 0  # set right before discard; helps with debugging
+        self.wait_on_end = wait_on_end
 
         # Initiate Deck
         self.gameDeck = Deck()
@@ -88,7 +91,9 @@ class GameMaster:
             print(winner.name)
             print("Winning Hand", winner.displayHand())
         self.status = "finished"
-        input()  # wait for input before clearing
+
+        if self.wait_on_end:
+            input("type and enter to end.")  # wait for input before clearing
 
     def deal(self):
         """Gives each player DEALSIZE tiles and the active player (assume to be first player) one extra"""

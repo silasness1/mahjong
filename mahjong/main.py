@@ -7,6 +7,8 @@ NUMPLAYERS = 4
 
 
 def survey_player_settings(NUMPLAYERS=4) -> dict:
+    """Uses input to generate a dictionary containing
+    player types and names."""
     custom_names = input("Want custom player names? Enter 0 for false 1 for true.")
     assert custom_names in ["0", "1"]
 
@@ -35,17 +37,34 @@ default_player_dict = {
 }
 
 
-def start(input_settings=False):
+def start(
+    player_dict: dict[str, str] = default_player_dict,
+    rand_seed: int = 10,
+    input_settings=False,
+    wait_on_end=True,
+) -> GameMaster:
+    """Entry point to the mahjong game."""
+
+    # Start up
     print("STARTING GAME")
-    random.seed(15)  # was 10
+    random.seed(rand_seed)
+
+    # Either custom settings or default
     if input_settings:
-        game = GameMaster(survey_player_settings())
+        game = GameMaster(survey_player_settings(), wait_on_end=wait_on_end)
     else:
-        game = GameMaster(default_player_dict)
+        game = GameMaster(player_dict, wait_on_end=wait_on_end)
+
+    # Deal
     game.deal()
+
+    # Main Game Loop
     while game.status != "finished":
-        game.takeTurn()  # handles discard, draw competition, check mahjong, transfers, and advancing active player
-    input("Game finished. Enter to clear game.")
+
+        # handles discard, draw competition, check mahjong, transfers, and advancing active player
+        game.takeTurn()
+
+    return game
 
 
 if __name__ == "__main__":
