@@ -5,8 +5,12 @@ root = tk.Tk()
 
 game_gui = GameGui(root)
 
-game_gui.create_frame()
+# game_gui.create_frame()
 game_gui.create_drag_tile()
+game_gui.create_drag_tile()
+game_gui.create_drag_tile()
+game_gui.create_drag_tile()
+
 
 
 root.mainloop()
