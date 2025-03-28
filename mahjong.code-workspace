@@ -9,12 +9,12 @@
 			"tests"
 		],
 		"python.autoComplete.extraPaths": [
-			"./tests",
-			"./mahjong"
+			"./controller",
+			"./model",
+			"./view",
 		],
 		"python.testing.unittestEnabled": false,
 		"python.testing.pytestEnabled": true,
-		"python.envFile": "${workspaceFolder}/.env",
 		"todo-tree.tree.showBadges": false /*cant use analysis.extrapath because it doesn't support pytest runner*/
 		
 	}

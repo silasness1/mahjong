@@ -1,0 +1,8 @@
+[project]
+name = "mahjong"
+version = "0.1.0"
+description = "My small project"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
