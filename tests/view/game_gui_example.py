@@ -1,4 +1,5 @@
 from mahjong.view.game_gui import GameGui
+
 import tkinter as tk
 
 root = tk.Tk()
