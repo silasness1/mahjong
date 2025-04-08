@@ -1,12 +1,12 @@
 """TODO: use inheritance to define two subclasses human and AI players"""
 
-from tile import Tile
+from mahjong.model.tile import Tile
 from abc import abstractmethod
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from game_master import GameMaster  # Only for type hints, prevents circular import
+    from mahjong.model.game_master import GameMaster  # Only for type hints, prevents circular import
 
 
 class Player:  # maybe deck and players inherit from tile collections
@@ -21,7 +21,7 @@ class Player:  # maybe deck and players inherit from tile collections
     -----------
     - `hand`: a list of tiles
     - `lockedTiles`: cards drawn from graveyard/kongs prevents reorganizing
-    - `name`: the player's name
+    - `name`: (str) the player's name
     - `lockedMelds`: an int indicating how many times a meld has been added to locked
     """
 

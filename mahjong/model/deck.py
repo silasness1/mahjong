@@ -1,6 +1,6 @@
 from multiprocessing import Value
 import random
-from tile import Tile
+from mahjong.model.tile import Tile
 
 
 class Deck:  # todo: finish docstring

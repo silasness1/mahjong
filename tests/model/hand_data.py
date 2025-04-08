@@ -1,6 +1,6 @@
 """Various hands used to test the functions which return and check pairs, melds, mahjongs etc"""
 
-from tile import Tile
+from mahjong.model.tile import Tile
 import pytest
 
 hand_pairwise_mahjong = [

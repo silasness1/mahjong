@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
-from tile import Tile
-from player import Player
-from check_win import getChouComponents, getCount, getChouIndices
+from mahjong.model.tile import Tile
+from mahjong.model.player import Player
+from mahjong.model.check_win import getChouComponents, getCount, getChouIndices
 import random
 
 if TYPE_CHECKING:

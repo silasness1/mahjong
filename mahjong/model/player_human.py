@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
-from tile import Tile
-from player import Player
+from mahjong.model.tile import Tile
+from mahjong.model.player import Player
 
 if TYPE_CHECKING:
     from game_master import GameMaster  # Only for type hints, prevents circular import

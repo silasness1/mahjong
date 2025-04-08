@@ -1,4 +1,4 @@
-import check_win
+import mahjong.model.check_win as check_win
 from hand_data import *  # noqa: F403
 
 

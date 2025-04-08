@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
-from mahjong.view.drag_tile import DragTile
+from mahjong.view.tile_image import TileImage
 
 class GameGui:
     """The view part of Model-View-Controller. This class is responsible for gathering input and 
@@ -21,45 +21,62 @@ class GameGui:
         self.tile_height = 40
         self.play_area = (50, 50, 450, 450)  # (x1, y1, x2, y2)
 
-        self.image_dict = { 
-                            ("Bam", 1): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou1.png",
-                            ("Bam", 2): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou2.png",
-                            ("Bam", 3): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou3.png",
-                            ("Bam", 4): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou4.png",
-                            ("Bam", 5): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou5.png",
-                            ("Bam", 6): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou6.png",
-                            ("Bam", 7): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou7.png",
-                            ("Bam", 8): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou8.png",
-                            ("Bam", 9): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Sou9.png",
-                            ("Ball", 1): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin1.png",
-                            ("Ball", 2): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin2.png",
-                            ("Ball", 3): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin3.png",
-                            ("Ball", 4): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin4.png",
-                            ("Ball", 5): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin5.png",
-                            ("Ball", 6): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin6.png",
-                            ("Ball", 7): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin7.png",
-                            ("Ball", 8): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin8.png",
-                            ("Ball", 9): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Pin9.png",
-                            ("Crack", 1): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man1.png",
-                            ("Crack", 2): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man2.png",
-                            ("Crack", 3): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man3.png",
-                            ("Crack", 4): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man4.png",
-                            ("Crack", 5): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man5.png",
-                            ("Crack", 6): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man6.png",
-                            ("Crack", 7): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man7.png",
-                            ("Crack", 8): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man8.png",
-                            ("Crack", 9): "/home/schmoopsan/dev/mahjong/mahjong/view/tile_images/with_background/Man9.png",
-                    }
+
 
     
-    def create_drag_tile(self, suit:str, rank:int, x = 100, y = 100, grid_size = 50, play_area = (50, 50, 450, 450), max_tile_width = 50, max_tile_height = 50):
+    def create_tile(self, suit:str, rank:int, x = 100, y = 100, grid_size_x = 50, grid_size_y =50, play_area = (50, 50, 450, 450), max_tile_width = 50, max_tile_height = 50, orientation = "bottom"):
         """creates a draggable tile at position x, y"""
-        image_path = self.image_dict[(suit, rank)]
-        my_tile = DragTile(self.canvas, x, y, 
-        image_path=image_path, grid_size=grid_size, play_area=play_area, max_tile_height=max_tile_height, max_tile_width=max_tile_width)
+        
+        my_tile = TileImage(self.canvas, 
+                            x, 
+                            y, 
+                            draggable=True,
+                            suit=suit, 
+                            rank=rank, 
+                            orientation=orientation,
+                            grid_size_x=grid_size_x, 
+                            grid_size_y=grid_size_y,
+                            play_area=play_area, 
+                            max_tile_height=max_tile_height, 
+                            max_tile_width=max_tile_width)
 
 
-    def render_others_closed(self):
-        "shows the backs of tiles for other 3 non-active players in closed-hand"
+    def render_game_state(self):
+        """updates the screen too reflect tiles in graveyard and player hands
+
+        checks to see if player's tile collection is functionally the same as their model hand. 
+
+        if not, update the local hand either by popping extra tiles or adding drawn tiles to the end so as to preserve player reordering preferences
+        """
+
+    
+
+    
+    def render_hand(self, player_hand):
+        """updates the screen to reflect the player's hand"""
+        pass
+
+    def render_graveyard(self, graveyard):
+        """updates the screen to reflect the graveyard"""
+
+    def query_player_hand(self):
+        """returns the current player's hand"""
+        pass
+
+    def query_graveyard(self):
+        """returns the current graveyard"""
+        pass
+
+    def query_gamestate(self):
+        """returns the current game state"""
+        
+        for player in player_list:
+            self.query_player_hand(player)
+     
+        self.query_graveyard()
+    
+        pass
+
+
     
 

@@ -1,9 +1,9 @@
 """Mahjong Program Entry Point"""
 
 import tkinter as tk
-from view.game_gui import GameGui
-from model.game_master import GameMaster
-from controller.game_controller import GameController
+from mahjong.view.game_gui import GameGui
+from mahjong.model.game_master import GameMaster
+from mahjong.controller.game_controller import GameController
 
 
 # start the GUI window

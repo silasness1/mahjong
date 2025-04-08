@@ -1,8 +1,8 @@
 """A collection of functions to check validity of potential moves and whether a collection 
 of tiles is a valid mahjong."""
 
-from tile import Tile
-from deck import Deck
+from mahjong.model.tile import Tile
+from mahjong.model.deck import Deck
 
 # from functools import lru_cache
 from typing import List

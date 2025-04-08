@@ -1,11 +1,11 @@
 """GameMaster manages the main game loop."""
 
-from deck import Deck
-from player import Player
-from player_ai import PlayerAI
-from player_human import PlayerHuman
-from tile import Tile
-from check_win import checkMahjong, getOfAKindIndices, getChouIndices
+from mahjong.model.deck import Deck
+from mahjong.model.player import Player
+from mahjong.model.player_ai import PlayerAI
+from mahjong.model.player_human import PlayerHuman
+from mahjong.model.tile import Tile
+from mahjong.model.check_win import checkMahjong, getOfAKindIndices, getChouIndices
 import random
 
 
@@ -17,7 +17,7 @@ class GameMaster:
     - `status`
     - `test`
     - `gameDeck`
-    - `graveyard`
+    - `graveyard`: list[Tile]
     - `playerList`
     - `activePlayer`
 
@@ -32,6 +32,11 @@ class GameMaster:
     - `_checkLegalDraw`
     - `_callForDiscard`
     - `_advanceToNextMove`
+    - `get_graveyard`
+    - `get_player_names`
+    - `get_active_player_name`
+    - `get_player_hand`
+    - `get_player_locked_tiles`
 
     """
 
@@ -52,7 +57,9 @@ class GameMaster:
         # Initiate Players
         self.playerList = []
 
-        assert len(playerDictionary.items()) == NUMPLAYERS
+        assert len(playerDictionary.items()) == NUMPLAYERS, "playerDictionary has to have correct number of players"
+        assert len(set(playerDictionary.keys())) == NUMPLAYERS, "Players in playerDictionary must be unique"
+
         for player_name, player_type in playerDictionary.items():
             if player_type == "ai":
                 self.playerList.append(PlayerAI(player_name, self))
@@ -61,6 +68,45 @@ class GameMaster:
 
         # Decide who goes first
         self.activePlayer = random.sample(self.playerList, 1)[0]
+
+    # Getters 
+
+    def get_graveyard(self) -> list[Tile]:
+        """Returns the graveyard."""
+        return self.graveyard
+    
+    def get_player_names(self)-> list[str]:
+        """Returns the names of the players."""
+        return [player.name for player in self.playerList]
+    
+    def get_active_player_name(self):
+        """Returns the names of the players."""
+        return self.activePlayer.name
+    
+    def get_player_hand(self, player_name: str) -> list[Tile]:
+        """Returns hand of a player given a name"""
+
+        player_hand = None
+
+        for player in self.playerList:
+            if player.name == player_name: # assumes no two players have the same name
+                player_hand = player.hand
+                return player_hand
+        
+        raise ValueError(f"Player {player_name} not found")
+    
+    def get_player_locked_tiles(self, player_name: str) -> list[Tile]:
+        """Returns hand of a player given a name"""
+
+        player_locked = None
+
+        for player in self.playerList:
+            if player.name == player_name: # assumes no two players have the same name
+                player_locked = player.lockedTiles
+                return player_locked
+        
+        raise ValueError(f"Player {player_name} not found")
+
 
     def _peakNextClockwisePlayer(self) -> tuple[Player, int]:
         """Get the next player without switching activePlayer.

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from tile import Tile
+from mahjong.model.tile import Tile
 
 
 class TileTests(TestCase):

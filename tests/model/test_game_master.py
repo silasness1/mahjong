@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import patch  # ,MagicMock
-from game_master import GameMaster
-from deck import Deck
+from mahjong.model.game_master import GameMaster
+from mahjong.model.deck import Deck
 
 
 # Fixture for mocking Deck

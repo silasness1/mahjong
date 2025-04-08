@@ -1,0 +1,50 @@
+import tkinter as tk
+from tkinter import ttk
+
+class StartSurvey(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Mahjong - Start Game")
+        self.geometry("400x300")
+        self.resizable(False, False)
+
+        self.player_names = []
+        self.player_types = []
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        tk.Label(self, text="Player Setup", font=("Helvetica", 16, "bold")).pack(pady=10)
+
+        frame = tk.Frame(self)
+        frame.pack()
+
+        for i in range(4):
+            row = tk.Frame(frame)
+            row.pack(pady=5)
+
+            tk.Label(row, text=f"Player {i + 1}:").pack(side=tk.LEFT, padx=5)
+
+            name_var = tk.StringVar(value=f"Player {i + 1}")
+            name_entry = tk.Entry(row, textvariable=name_var, width=15)
+            name_entry.pack(side=tk.LEFT, padx=5)
+            self.player_names.append(name_var)
+
+            type_var = tk.StringVar(value="Human")
+            type_menu = ttk.OptionMenu(row, type_var, "Human", "Human", "AI")
+            type_menu.pack(side=tk.LEFT, padx=5)
+            self.player_types.append(type_var)
+
+        # Start button
+        start_btn = tk.Button(self, text="Start Game", command=self.start_game)
+        start_btn.pack(pady=15)
+
+    def start_game(self):
+        # You can hook this to your controller
+        for i in range(4):
+            print(f"{self.player_names[i].get()} - {self.player_types[i].get()}")
+        self.destroy()
+
+if __name__ == "__main__":
+    app = StartSurvey()
+    app.mainloop()
